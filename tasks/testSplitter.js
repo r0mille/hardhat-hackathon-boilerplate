@@ -5,12 +5,13 @@ const fs = require("fs");
 const address = {
     one: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
     two: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-    splitter: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    splitter: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
 };
 
 
 task("sendSplitter", "send money to the splitter")
-  .setAction(async () => {
+  .addParam("sendAmount", "amount of token to send to the splitter")
+  .setAction(async ({ sendAmount }) => {
     if (network.name === "hardhat") {
       console.warn(
         "You are running the faucet task with Hardhat network, which" +
@@ -26,18 +27,21 @@ task("sendSplitter", "send money to the splitter")
 
     // Get Splitter
     const splitter = await ethers.getContractAt("PaymentSplitter", address.splitter);
+    console.log('sendAmount', sendAmount)
 
     // Send some money to the contract
     const [sender] = await ethers.getSigners();
     await sender.sendTransaction({
         to: splitter.address,
-        value: 10,
+        value: parseInt(sendAmount) || 10,
     });
   });
 
 
-task("releaseOne", "release for One")
-  .setAction(async () => {
+task("release", "release for an address")
+  .addParam("addressKey", "which add to release")
+  .setAction(async ({ addressKey }) => {
+    const releaseAddress = address[addressKey]
     if (network.name === "hardhat") {
       console.warn(
         "You are running the faucet task with Hardhat network, which" +
@@ -54,13 +58,13 @@ task("releaseOne", "release for One")
     // Get Splitter
     const splitter = await ethers.getContractAt("PaymentSplitter", address.splitter);
 
-    await splitter.release(address.one)
+    await splitter.release(releaseAddress)
 
     const totalReleased = await splitter.totalReleased();
     console.log('TotalReleased', totalReleased.toNumber());
 
-    const oneReleased = await splitter.released(address.one);
-    console.log('oneReleased', oneReleased.toNumber())
+    const released = await splitter.released(releaseAddress);
+    console.log('released to this address', released.toNumber())
   });
 
 task("inspectSplitter", "Inspection for Splitter")

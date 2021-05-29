@@ -31,7 +31,7 @@ async function main() {
     "One and Two:", oneAdd, twoAdd
   );
   const Splitter = await ethers.getContractFactory("PaymentSplitter");
-  const splitter = await Splitter.deploy([oneAdd, twoAdd],[400, 400]);
+  const splitter = await Splitter.deploy([oneAdd, twoAdd],[200, 400]);
   await splitter.deployed();
 
   console.log("Splitter address:", splitter.address);
